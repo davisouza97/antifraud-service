@@ -1,0 +1,388 @@
+{
+	"info": {
+		"_postman_id": "bd8a829a-b153-4f33-a980-0d7d9235c946",
+		"name": "análise-fraude",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7488661"
+	},
+	"item": [
+		{
+			"name": "kafka",
+			"item": [
+				{
+					"name": "publish transacoes.events",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.kafka.json.v2+json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/vnd.kafka.v2+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"records\": [\r\n    {\r\n      \"value\": {\r\n        \"idTransacao\": \"TX5\",\r\n        \"idConta\": \"5\",\r\n        \"valor\": 27.75,\r\n        \"tipo\": \"DEBITO\",\r\n        \"dataHora\": \"2025-10-02T09:30:15\"\r\n      }\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/topics/transacoes.events",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"topics",
+								"transacoes.events"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create consumer antifraude-group",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.kafka.json.v2+json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/vnd.kafka.v2+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"antifraude-consumer\",\r\n  \"format\": \"json\",\r\n  \"auto.offset.reset\": \"earliest\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/consumers/antifraude-group",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"consumers",
+								"antifraude-group"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "subscribe consumer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.kafka.json.v2+json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/vnd.kafka.v2+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"topics\": [\"fraud.suspictions.notifications\"]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/consumers/antifraude-group/instances/antifraude-consumer/subscription",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"consumers",
+								"antifraude-group",
+								"instances",
+								"antifraude-consumer",
+								"subscription"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "read fraud.suspictions.notifications",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/vnd.kafka.json.v2+json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8082/consumers/antifraude-group/instances/antifraude-consumer/records",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"consumers",
+								"antifraude-group",
+								"instances",
+								"antifraude-consumer",
+								"records"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "mock",
+			"item": [
+				{
+					"name": "teste mock",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://13289d5f-2661-4b2b-afad-5a2fdde5d431.mock.pstmn.io/contas/1234",
+							"protocol": "https",
+							"host": [
+								"13289d5f-2661-4b2b-afad-5a2fdde5d431",
+								"mock",
+								"pstmn",
+								"io"
+							],
+							"path": [
+								"contas",
+								"1234"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Cliente",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://mock-server.io/contas/123",
+							"protocol": "https",
+							"host": [
+								"mock-server",
+								"io"
+							],
+							"path": [
+								"contas",
+								"123"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get Cliente",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://mock-server.io/contas/:idContaPath",
+									"protocol": "https",
+									"host": [
+										"mock-server",
+										"io"
+									],
+									"path": [
+										"contas",
+										":idContaPath"
+									],
+									"variable": [
+										{
+											"key": "idContaPath",
+											"value": ""
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"idConta\": {{$pathSegments '1'}},\n    \"valorLimiteParaDebito\": 500,\n    \"valorLimiteParaCredito\": 10000,\n    \"contaAtiva\": true\n}\n"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "API Rest",
+			"item": [
+				{
+					"name": "transaction status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/analises/TX5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"analises",
+								"TX5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "transações suspeitas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/analises/suspeitas?dataInicial=01/10/2025&dataFinal=02/10/2025",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"analises",
+								"suspeitas"
+							],
+							"query": [
+								{
+									"key": "idConta",
+									"value": "2",
+									"disabled": true
+								},
+								{
+									"key": "dataInicial",
+									"value": "01/10/2025"
+								},
+								{
+									"key": "dataFinal",
+									"value": "02/10/2025"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/analises/TX5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"analises",
+								"TX5"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "idConta",
+			"value": "123",
+			"type": "default"
+		}
+	]
+}

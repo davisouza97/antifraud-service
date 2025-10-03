@@ -1,0 +1,46 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: antifraud-service
+  kafka:
+    bootstrap-servers: localhost:29092
+    consumer:
+      group-id: antifraude-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  datasource:
+    url: jdbc:mysql://localhost:3306/antifraud?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+    username: user
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: ${SHOW_SQL_IN_LOG:true}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+logging:
+  level:
+    root: INFO
+    br.com.matera.antifraudservice: DEBUG
+
+clients:
+  account:
+    url: ${ACCOUNT_URL:https://13289d5f-2661-4b2b-afad-5a2fdde5d431.mock.pstmn.io}
+
+features:
+  transactionLookbackDays: ${TRANSACTION_LOOKBACK_DAYS:7}
+  maxSameTypeTransactions: ${MAX_SAME_TYPE_TRANSACTIONS:3}
+  sameTypeTransactionWindowInMinutes: ${SAME_TYPE_TRANSACTION_WINDOW_IN_MINUTES:3}
+
+topics:
+  transactions: transacoes.events
+  fraud-notification: fraud.suspictions.notifications

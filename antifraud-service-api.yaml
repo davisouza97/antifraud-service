@@ -1,0 +1,195 @@
+openapi: 3.0.3
+info:
+  title: Serviço Anti-Fraude (AntiFraud Service)
+  description: API REST para consulta e gerenciamento do status de análises de transações.
+  version: v1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Base URL do Serviço Anti-Fraude (Porta Padrão)
+tags:
+  - name: Analises
+    description: Gerenciamento e consulta do status de análise de fraude.
+
+paths:
+  /analises/{idTransacao}:
+    get:
+      tags:
+        - Analises
+      summary: Consulta o status de fraude de uma transação específica.
+      operationId: getTransactionStatus
+      parameters:
+        - in: path
+          name: idTransacao
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ID único da transação a ser consultada.
+      responses:
+        '200':
+          description: Status da análise encontrado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FraudStatus'
+              example: SUSPEITA_DE_FRAUDE
+        '404':
+          description: Transação não encontrada.
+    patch:
+      tags:
+        - Analises
+      summary: Atualiza manualmente o status de uma análise de fraude.
+      description: Utilizado por analistas para validar (APROVADO) ou reverter (SUSPEITA_DE_FRAUDE) uma análise inicial.
+      operationId: updateAnalysisStatus
+      parameters:
+        - in: path
+          name: idTransacao
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ID único da transação a ser atualizada.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAnalysisStatusDTO'
+      responses:
+        '204':
+          description: Status da análise atualizado com sucesso.
+        '400':
+          description: Requisição inválida (status não permitido, por exemplo).
+        '404':
+          description: Transação não encontrada.
+
+  /analises/suspeitas:
+    get:
+      tags:
+        - Analises
+      summary: Lista transações marcadas como suspeitas, permitindo filtros de data e conta.
+      operationId: getSuspiciousTransactions
+      parameters:
+        - in: query
+          name: dataInicial
+          schema:
+            type: string
+            format: date
+          example: 01/01/2025
+          description: Data de início do período de consulta (Formato dd/MM/yyyy).
+        - in: query
+          name: dataFinal
+          schema:
+            type: string
+            format: date
+          example: 31/01/2025
+          description: Data final do período de consulta (Formato dd/MM/yyyy).
+        - in: query
+          name: idConta
+          schema:
+            type: string
+            format: uuid
+          description: O ID da conta para filtrar as suspeitas.
+      responses:
+        '200':
+          description: Lista de transações suspeitas retornada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionResponseDTO'
+        '400':
+          description: Parâmetros de filtro inválidos.
+
+components:
+  schemas:
+    # ENUMS
+
+    FraudStatus:
+      type: string
+      description: Status final da análise de fraude.
+      enum:
+        - APROVADO
+        - SUSPEITA_DE_FRAUDE
+
+    FraudReason:
+      type: string
+      description: Motivo que levou a transação a ser marcada como SUSPEITA_DE_FRAUDE.
+      enum:
+        # Correspondente a EXCEEDED_TRANSACTION_LIMIT
+        - EXCEEDED_TRANSACTION_LIMIT
+        # Correspondente a ACCOUNT_INACTIVE
+        - ACCOUNT_INACTIVE
+        # Correspondente a SUSPECT_TRANSACTION_INTERVAL_WITHOUT_REVIEW
+        - SUSPECT_TRANSACTION_INTERVAL_WITHOUT_REVIEW
+        # Correspondente a SUSPECT_TRANSACTION_INTERVAL (Regra Bônus de 3 em 2 min)
+        - SUSPECT_TRANSACTION_INTERVAL
+
+    TransactionType:
+      type: string
+      description: Tipo da transação.
+      enum:
+        - DEBITO
+        - CREDITO
+
+    # DTOs
+
+    TransactionResponseDTO:
+      type: object
+      description: Estrutura de resposta para transações suspeitas.
+      properties:
+        idTransacao:
+          type: string
+          format: uuid
+          description: ID da transação original.
+        idConta:
+          type: string
+          format: uuid
+          description: ID da conta que realizou a transação.
+        valor:
+          type: number
+          format: double
+          description: Valor da transação.
+        tipo:
+          $ref: '#/components/schemas/TransactionType'
+        dataTransacao:
+          type: string
+          format: date-time
+          description: Data e hora em que a transação foi realizada (corresponde a dataHoraTransacao no Entity).
+        status:
+          $ref: '#/components/schemas/FraudStatus'
+        reason:
+          $ref: '#/components/schemas/FraudReason'
+      required:
+        - idTransacao
+        - idConta
+        - status
+
+    UpdateAnalysisStatusDTO:
+      type: object
+      description: Payload para atualizar o status de uma análise manualmente.
+      properties:
+        status:
+          $ref: '#/components/schemas/FraudStatus'
+      required:
+        - status
+
+    SuspicionFilterDTO:
+      type: object
+      description: Parâmetros para filtrar transações suspeitas por período e conta.
+      properties:
+        dataInicial:
+          type: string
+          format: date
+          example: 01/01/2025
+          description: Data de início do período (Formato dd/MM/yyyy).
+        dataFinal:
+          type: string
+          format: date
+          example: 31/01/2025
+          description: Data final do período (Formato dd/MM/yyyy).
+        idConta:
+          type: string
+          format: uuid
+          description: ID da conta para pesquisa.
