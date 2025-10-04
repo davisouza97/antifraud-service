@@ -11,7 +11,7 @@ public class AccountProxy {
 
     private static final Logger log = LoggerFactory.getLogger(AccountProxy.class);
 
-    AccountClient accountClient;
+    private final AccountClient accountClient;
 
     public AccountProxy(AccountClient accountClient) {
         this.accountClient = accountClient;

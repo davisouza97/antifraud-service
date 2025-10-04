@@ -17,9 +17,9 @@ public class FraudReportPublisher {
     @Value("${topics.fraud-notification}")
     private String fraudNotification;
 
-    KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
-    ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
     public FraudReportPublisher(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper mapper) {
         this.kafkaTemplate = kafkaTemplate;
