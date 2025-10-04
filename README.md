@@ -76,9 +76,20 @@ Isso irá subir:
 
 ### 2. Rodar a aplicação
 
+Após a subida dos containers, execute o comando:
+
 ```bash
 mvn spring-boot:run
 ```
+Esse comando já baixa as dependências necessárias automaticamente.
+No entanto, se ocorrer algum erro de resolução de dependências (por exemplo, cache corrompido no Maven), rode:
+
+```bash
+mvn clean install
+```
+
+e após isso volte a rodar o primeiro comando da etapa 2.
+
 A aplicação estará disponível em:
 http://localhost:8080
 
